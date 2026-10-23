@@ -25,6 +25,7 @@ interface CartContextType {
   isPending: boolean
   openCart: () => void
   closeCart: () => void
+  refreshCart: () => Promise<void>
   addToCart: (product: Product, quantity: number) => void
   removeFromCart: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
@@ -141,6 +142,11 @@ export function CartProvider({ children }: CartProviderProps) {
   const openCart = useCallback(() => setIsOpen(true), [])
   const closeCart = useCallback(() => setIsOpen(false), [])
 
+  const refreshCart = useCallback(async () => {
+    const updated = await getCartAction()
+    setCart(updated)
+  }, [])
+
   const addToCart = useCallback(
     (product: Product, quantity: number) => {
       startTransition(async () => {
@@ -195,6 +201,7 @@ export function CartProvider({ children }: CartProviderProps) {
         isPending,
         openCart,
         closeCart,
+        refreshCart,
         addToCart,
         removeFromCart,
         updateQuantity,
