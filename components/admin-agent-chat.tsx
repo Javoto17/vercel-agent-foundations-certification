@@ -56,6 +56,71 @@ export function AdminAgentChat() {
         <ConversationContent>
           {messages.map((message) =>
             message.parts.map((part, index) => {
+              if (part.type === "tool-bash") {
+                const input = part.input as { command?: string } | undefined;
+                const output = part.output as
+                  | { stdout?: string; stderr?: string; exitCode?: number }
+                  | undefined;
+                const outputAvailable = part.state === "output-available";
+
+                return (
+                  <div
+                    key={`${message.id}-${index}`}
+                    className="my-2 overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 font-mono text-sm"
+                  >
+                    <div className="flex items-center gap-2 border-b border-neutral-800 bg-neutral-800/50 px-3 py-2 text-neutral-400">
+                      <svg
+                        className="size-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z"
+                        />
+                      </svg>
+                      <span className="text-xs">
+                        {outputAvailable ? "Terminal" : "Running…"}
+                      </span>
+                    </div>
+                    <div className="px-3 py-2">
+                      <div className="break-all font-semibold text-neutral-100">
+                        $ {input?.command ?? ""}
+                      </div>
+                      {outputAvailable && output ? (
+                        <div className="mt-1 text-neutral-300">
+                          {output.stdout ? (
+                            <pre className="whitespace-pre-wrap">
+                              {output.stdout}
+                            </pre>
+                          ) : null}
+                          {output.stderr ? (
+                            <pre className="whitespace-pre-wrap text-red-400">
+                              {output.stderr}
+                            </pre>
+                          ) : null}
+                          {typeof output.exitCode === "number" &&
+                          output.exitCode !== 0 ? (
+                            <div className="mt-1 text-red-400">
+                              Process exited with code {output.exitCode}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <div className="mt-1 flex items-center gap-1 text-neutral-500">
+                          <span className="animate-pulse">▊</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
               if (part.type !== "text") return null;
 
               return (
